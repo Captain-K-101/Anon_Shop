@@ -44,6 +44,14 @@ function DeliveryRedirectGuard() {
   return null;
 }
 
+function UserHomeRedirectGuard() {
+  const { user } = useAuth();
+  if (user && user.role === 'USER') {
+    return <Navigate to="/products" replace />;
+  }
+  return <Layout><Home /></Layout>;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -54,10 +62,10 @@ function App() {
             <Route path="/" element={<Layout><Home /></Layout>} />
             <Route path="/login" element={<Layout><Login /></Layout>} />
             <Route path="/register" element={<Layout><Register /></Layout>} />
-            <Route path="/products" element={<Layout><Products /></Layout>} />
-            <Route path="/products/:id" element={<Layout><ProductDetails /></Layout>} />
 
-            {/* User Routes */}
+            {/* Protected User Routes */}
+            <Route path="/products" element={<Layout><ProtectedRoute><Products /></ProtectedRoute></Layout>} />
+            <Route path="/products/:id" element={<Layout><ProtectedRoute><ProductDetails /></ProtectedRoute></Layout>} />
             <Route path="/cart" element={<Layout><ProtectedRoute><Cart /></ProtectedRoute></Layout>} />
             <Route path="/orders" element={<Layout><ProtectedRoute><Orders /></ProtectedRoute></Layout>} />
             <Route path="/profile" element={<Layout><ProtectedRoute><Profile /></ProtectedRoute></Layout>} />
@@ -80,6 +88,9 @@ function App() {
 
             {/* Checkout */}
             <Route path="/checkout" element={<Layout><ProtectedRoute><Checkout /></ProtectedRoute></Layout>} />
+
+            {/* Redirect logged-in users from / to /products */}
+            <Route path="/" element={<UserHomeRedirectGuard />} />
 
             {/* 404 Not Found */}
             <Route path="*" element={<Layout><NotFound /></Layout>} />

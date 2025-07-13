@@ -103,6 +103,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         toast.success('Login successful!')
         if (data.user.role === 'DELIVERY') {
           navigate('/delivery', { replace: true })
+        } else if (data.user.role === 'USER') {
+          navigate('/products', { replace: true })
         }
       },
       onError: (error: any) => {
@@ -125,6 +127,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         toast.success('Registration successful!')
         if (data.user.role === 'DELIVERY') {
           navigate('/delivery', { replace: true })
+        } else if (data.user.role === 'USER') {
+          navigate('/products', { replace: true })
         }
       },
       onError: (error: any) => {

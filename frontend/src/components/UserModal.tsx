@@ -386,6 +386,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, onUserCreated, e
                     >
                       <option value="USER">Normal User</option>
                       <option value="ADMIN">Admin User</option>
+                      <option value="DELIVERY">Delivery Personnel</option>
                     </select>
                   </div>
                   <div>
