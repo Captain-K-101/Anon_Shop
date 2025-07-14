@@ -115,123 +115,125 @@ const Checkout: React.FC = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
-      <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Shipping Address */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-              <input type="text" name="name" value={shipping.name} onChange={handleInput} className={`w-full px-3 py-2 border ${fieldErrors.name ? 'border-red-400' : 'border-gray-300'} rounded-lg`} required />
-              {fieldErrors.name && <div className="text-red-600 text-xs mt-1">{fieldErrors.name}</div>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
-              <input type="tel" name="phone" value={shipping.phone} onChange={handleInput} className={`w-full px-3 py-2 border ${fieldErrors.phone ? 'border-red-400' : 'border-gray-300'} rounded-lg`} required />
-              {fieldErrors.phone && <div className="text-red-600 text-xs mt-1">{fieldErrors.phone}</div>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
-              <textarea name="address" value={shipping.address} onChange={handleInput} rows={2} className={`w-full px-3 py-2 border ${fieldErrors.address ? 'border-red-400' : 'border-gray-300'} rounded-lg`} required />
-              {fieldErrors.address && <div className="text-red-600 text-xs mt-1">{fieldErrors.address}</div>}
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="max-w-2xl mx-auto px-2 sm:px-4 md:px-6 py-8">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6">Checkout</h1>
+      <form onSubmit={handlePlaceOrder} className="space-y-6">
+        <div className="space-y-4">
+          {/* Shipping Address */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
-                <input type="text" name="city" value={shipping.city} onChange={handleInput} className={`w-full px-3 py-2 border ${fieldErrors.city ? 'border-red-400' : 'border-gray-300'} rounded-lg`} required />
-                {fieldErrors.city && <div className="text-red-600 text-xs mt-1">{fieldErrors.city}</div>}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                <input type="text" name="name" value={shipping.name} onChange={handleInput} className={`w-full px-3 py-2 border ${fieldErrors.name ? 'border-red-400' : 'border-gray-300'} rounded-lg`} required />
+                {fieldErrors.name && <div className="text-red-600 text-xs mt-1">{fieldErrors.name}</div>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">State *</label>
-                <input type="text" name="state" value={shipping.state} onChange={handleInput} className={`w-full px-3 py-2 border ${fieldErrors.state ? 'border-red-400' : 'border-gray-300'} rounded-lg`} required />
-                {fieldErrors.state && <div className="text-red-600 text-xs mt-1">{fieldErrors.state}</div>}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                <input type="tel" name="phone" value={shipping.phone} onChange={handleInput} className={`w-full px-3 py-2 border ${fieldErrors.phone ? 'border-red-400' : 'border-gray-300'} rounded-lg`} required />
+                {fieldErrors.phone && <div className="text-red-600 text-xs mt-1">{fieldErrors.phone}</div>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Pincode *</label>
-                <input type="text" name="pincode" value={shipping.pincode} onChange={handleInput} className={`w-full px-3 py-2 border ${fieldErrors.pincode ? 'border-red-400' : 'border-gray-300'} rounded-lg`} required />
-                {fieldErrors.pincode && <div className="text-red-600 text-xs mt-1">{fieldErrors.pincode}</div>}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                <textarea name="address" value={shipping.address} onChange={handleInput} rows={2} className={`w-full px-3 py-2 border ${fieldErrors.address ? 'border-red-400' : 'border-gray-300'} rounded-lg`} required />
+                {fieldErrors.address && <div className="text-red-600 text-xs mt-1">{fieldErrors.address}</div>}
               </div>
-            </div>
-          </div>
-        </div>
-        {/* Order Summary & Payment */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col justify-between">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-            <div className="space-y-2 mb-4">
-              {items.map(item => (
-                <div key={item.id} className="flex justify-between text-gray-700 text-sm">
-                  <span>{item.name} x {item.quantity}</span>
-                  <span>₹{((item.salePrice || item.price) * item.quantity).toLocaleString('en-IN')}</span>
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-between text-gray-700 mb-2">
-              <span>Subtotal</span>
-              <span>₹{subtotal.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="flex justify-between text-gray-700 mb-2">
-              <span>Tax (18% GST)</span>
-              <span>₹{tax.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="flex justify-between text-gray-700 mb-2">
-              <span>Shipping</span>
-              <span>{shippingFee === 0 ? 'Free' : `₹${shippingFee.toLocaleString('en-IN')}`}</span>
-            </div>
-            <div className="border-t border-gray-200 my-4"></div>
-            <div className="flex justify-between text-lg font-bold text-gray-900 mb-6">
-              <span>Total</span>
-              <span>₹{total.toLocaleString('en-IN')}</span>
-            </div>
-            <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
-            <div className="space-y-2 mb-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="COD"
-                  checked={paymentMethod === 'COD'}
-                  onChange={() => setPaymentMethod('COD')}
-                  className="mr-2"
-                />
-                Cash on Delivery (COD)
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="UPI"
-                  checked={paymentMethod === 'UPI'}
-                  onChange={() => setPaymentMethod('UPI')}
-                  className="mr-2"
-                />
-                UPI
-              </label>
-              {paymentMethod === 'UPI' && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <input
-                    type="text"
-                    placeholder="Enter your UPI ID"
-                    value={upiId}
-                    onChange={e => setUpiId(e.target.value)}
-                    className={`w-full px-3 py-2 border ${fieldErrors.upiId ? 'border-red-400' : 'border-gray-300'} rounded-lg mt-2`}
-                    required
-                  />
-                  {fieldErrors.upiId && <div className="text-red-600 text-xs mt-1">{fieldErrors.upiId}</div>}
+                  <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                  <input type="text" name="city" value={shipping.city} onChange={handleInput} className={`w-full px-3 py-2 border ${fieldErrors.city ? 'border-red-400' : 'border-gray-300'} rounded-lg`} required />
+                  {fieldErrors.city && <div className="text-red-600 text-xs mt-1">{fieldErrors.city}</div>}
                 </div>
-              )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">State *</label>
+                  <input type="text" name="state" value={shipping.state} onChange={handleInput} className={`w-full px-3 py-2 border ${fieldErrors.state ? 'border-red-400' : 'border-gray-300'} rounded-lg`} required />
+                  {fieldErrors.state && <div className="text-red-600 text-xs mt-1">{fieldErrors.state}</div>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Pincode *</label>
+                  <input type="text" name="pincode" value={shipping.pincode} onChange={handleInput} className={`w-full px-3 py-2 border ${fieldErrors.pincode ? 'border-red-400' : 'border-gray-300'} rounded-lg`} required />
+                  {fieldErrors.pincode && <div className="text-red-600 text-xs mt-1">{fieldErrors.pincode}</div>}
+                </div>
+              </div>
             </div>
-            {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">{error}</div>}
           </div>
-          <button
-            type="submit"
-            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 mt-4"
-            disabled={loading}
-          >
-            {loading ? 'Placing Order...' : 'Place Order'}
-          </button>
+          {/* Order Summary & Payment */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col justify-between">
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+              <div className="space-y-2 mb-4">
+                {items.map(item => (
+                  <div key={item.id} className="flex justify-between text-gray-700 text-sm">
+                    <span>{item.name} x {item.quantity}</span>
+                    <span>₹{((item.salePrice || item.price) * item.quantity).toLocaleString('en-IN')}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between text-gray-700 mb-2">
+                <span>Subtotal</span>
+                <span>₹{subtotal.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between text-gray-700 mb-2">
+                <span>Tax (18% GST)</span>
+                <span>₹{tax.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between text-gray-700 mb-2">
+                <span>Shipping</span>
+                <span>{shippingFee === 0 ? 'Free' : `₹${shippingFee.toLocaleString('en-IN')}`}</span>
+              </div>
+              <div className="border-t border-gray-200 my-4"></div>
+              <div className="flex justify-between text-lg font-bold text-gray-900 mb-6">
+                <span>Total</span>
+                <span>₹{total.toLocaleString('en-IN')}</span>
+              </div>
+              <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
+              <div className="space-y-2 mb-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="COD"
+                    checked={paymentMethod === 'COD'}
+                    onChange={() => setPaymentMethod('COD')}
+                    className="mr-2"
+                  />
+                  Cash on Delivery (COD)
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="UPI"
+                    checked={paymentMethod === 'UPI'}
+                    onChange={() => setPaymentMethod('UPI')}
+                    className="mr-2"
+                  />
+                  UPI
+                </label>
+                {paymentMethod === 'UPI' && (
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Enter your UPI ID"
+                      value={upiId}
+                      onChange={e => setUpiId(e.target.value)}
+                      className={`w-full px-3 py-2 border ${fieldErrors.upiId ? 'border-red-400' : 'border-gray-300'} rounded-lg mt-2`}
+                      required
+                    />
+                    {fieldErrors.upiId && <div className="text-red-600 text-xs mt-1">{fieldErrors.upiId}</div>}
+                  </div>
+                )}
+              </div>
+              {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">{error}</div>}
+            </div>
+            <button
+              type="submit"
+              className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 mt-4"
+              disabled={loading}
+            >
+              {loading ? 'Placing Order...' : 'Place Order'}
+            </button>
+          </div>
         </div>
       </form>
     </div>

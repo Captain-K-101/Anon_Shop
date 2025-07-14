@@ -206,7 +206,7 @@ const AdminDashboard: React.FC = () => {
             {analytics?.recentOrders && analytics.recentOrders.length > 0 ? (
               <div className="space-y-4">
                 {analytics.recentOrders.map((order) => (
-                  <div key={order._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div key={order._id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gray-50 rounded-lg space-y-2 sm:space-y-0">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3">
                         <div className="flex-shrink-0">
@@ -222,7 +222,7 @@ const AdminDashboard: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-wrap gap-2 items-center">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
                         {order.status}
                       </span>
@@ -254,7 +254,7 @@ const AdminDashboard: React.FC = () => {
             {analytics?.topProducts && analytics.topProducts.length > 0 ? (
               <div className="space-y-4">
                 {analytics.topProducts.map((item, index) => (
-                  <div key={item.productId} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                  <div key={item.productId} className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-4 p-4 bg-gray-50 rounded-lg space-y-2 sm:space-y-0">
                     <div className="flex-shrink-0">
                       <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
                         <span className="text-sm font-medium text-gray-600">{index + 1}</span>
