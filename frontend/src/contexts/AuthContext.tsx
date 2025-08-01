@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
-import axios from 'axios'
+import api from '../lib/axios'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
@@ -64,9 +64,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Set up axios defaults
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`
     } else {
-      delete axios.defaults.headers.common['Authorization']
+      delete api.defaults.headers.common['Authorization']
     }
   }, [token])
 
@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     ['user', token],
     async () => {
       if (!token) return null
-      const response = await axios.get('/api/auth/profile')
+      const response = await api.get('/api/auth/profile')
       return response.data.user
     },
     {
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Login mutation
   const loginMutation = useMutation(
     async ({ email, password }: { email: string; password: string }) => {
-      const response = await axios.post('/api/auth/login', { email, password })
+      const response = await api.post('/api/auth/login', { email, password })
       return response.data
     },
     {
@@ -116,7 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Register mutation
   const registerMutation = useMutation(
     async (userData: RegisterData) => {
-      const response = await axios.post('/api/auth/register', userData)
+      const response = await api.post('/api/auth/register', userData)
       return response.data
     },
     {

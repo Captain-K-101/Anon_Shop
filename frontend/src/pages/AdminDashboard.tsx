@@ -9,6 +9,7 @@ import {
   Clock,
   CheckCircle
 } from 'lucide-react';
+import api from '../lib/axios';
 
 interface DashboardAnalytics {
   totalUsers: number;
@@ -49,18 +50,8 @@ const AdminDashboard: React.FC = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch('/api/admin/dashboard', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch dashboard data');
-      }
-
-      const data = await response.json();
-      setAnalytics(data.analytics);
+      const response = await api.get('/api/admin/dashboard');
+      setAnalytics(response.data.analytics);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {

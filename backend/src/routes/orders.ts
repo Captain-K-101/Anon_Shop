@@ -176,7 +176,7 @@ router.get('/:id', authenticateToken, [
 // Update order status (admin only)
 router.put('/:id/status', authenticateToken, requireAdmin, [
   param('id').isString(),
-  body('status').isIn(['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED']),
+  body('status').isIn(['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED', 'REFUNDED']),
   body('paymentStatus').optional().isIn(['PENDING', 'COMPLETED', 'FAILED', 'REFUNDED'])
 ], async (req: AuthRequest, res: Response) => {
   try {

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import api from '../lib/axios';
 
 interface ReferralNode {
   _id: string;
@@ -30,15 +31,8 @@ const AdminReferrals: React.FC = () => {
   const fetchTree = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/referral-tree', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setTree(data.tree);
-      }
+      const response = await api.get('/api/admin/referral-tree');
+      setTree(response.data.tree);
     } finally {
       setLoading(false);
     }
@@ -49,15 +43,8 @@ const AdminReferrals: React.FC = () => {
     setUserDetails(null);
     setDetailsLoading(true);
     try {
-      const response = await fetch(`/api/admin/users/${node._id}/details`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUserDetails(data);
-      }
+      const response = await api.get(`/api/admin/users/${node._id}/details`);
+      setUserDetails(response.data);
     } finally {
       setDetailsLoading(false);
     }
@@ -67,17 +54,8 @@ const AdminReferrals: React.FC = () => {
     if (!userDetails?.user) return;
     setFlagLoading(true);
     try {
-      const response = await fetch(`/api/admin/users/${userDetails.user._id}/flag`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ flagged: !userDetails.user.flagged })
-      });
-      if (response.ok) {
-        setUserDetails({ ...userDetails, user: { ...userDetails.user, flagged: !userDetails.user.flagged } });
-      }
+      await api.post(`/api/admin/users/${userDetails.user._id}/flag`, { flagged: !userDetails.user.flagged });
+      setUserDetails({ ...userDetails, user: { ...userDetails.user, flagged: !userDetails.user.flagged } });
     } finally {
       setFlagLoading(false);
     }

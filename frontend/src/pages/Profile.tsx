@@ -20,6 +20,7 @@ import {
   Share2
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../lib/axios';
 
 interface UserOrder {
   _id: string;
@@ -66,16 +67,8 @@ const Profile: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/orders/my-orders', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setOrders(data.orders);
-      }
+      const response = await api.get('/api/orders');
+      setOrders(response.data.orders);
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
@@ -86,20 +79,9 @@ const Profile: React.FC = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/users/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        const updatedUser = await response.json();
-        updateUser(updatedUser.user);
-        setIsEditing(false);
-      }
+      const response = await api.put('/api/users/profile', formData);
+      updateUser(response.data.user);
+      setIsEditing(false);
     } catch (error) {
       console.error('Error updating profile:', error);
     } finally {

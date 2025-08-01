@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../lib/axios';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Product {
   _id: string;
@@ -16,6 +17,7 @@ interface Product {
 
 const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,10 +32,10 @@ const ProductDetails: React.FC = () => {
       setLoading(true);
       setError('');
       try {
-        const res = await axios.get(`/api/products/${id}`);
+        const res = await api.get(`/api/products/${id}`);
         setProduct(res.data.product);
         if (res.data.product?.categoryId?._id) {
-          const rel = await axios.get(`/api/products?category=${res.data.product.categoryId.name}&limit=4`);
+          const rel = await api.get(`/api/products?category=${res.data.product.categoryId.name}&limit=4`);
           setRelated(rel.data.products.filter((p: Product) => p._id !== id));
         }
       } catch (err: any) {
@@ -50,7 +52,7 @@ const ProductDetails: React.FC = () => {
   if (!product) return <div className="py-20 text-center">Product not found.</div>;
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 bg-gradient-to-br from-gray-50 to-white min-h-screen">
+    <div className={`max-w-7xl mx-auto py-8 px-4 min-h-screen ${user ? 'bg-black' : 'bg-gradient-to-br from-gray-50 to-white'}`}>
       <div className="flex flex-col md:flex-row gap-10">
         {/* Left: Scrollable Image Gallery */}
         <div className="md:w-1/3 flex flex-col items-center">
@@ -60,7 +62,7 @@ const ProductDetails: React.FC = () => {
                 key={i}
                 src={img}
                 alt=""
-                className={`w-16 h-16 object-cover rounded border cursor-pointer transition-all duration-200 ${selectedImg === i ? 'ring-2 ring-primary-600 scale-105' : 'hover:scale-105'}`}
+                className={`w-16 h-16 object-cover rounded border cursor-pointer transition-all duration-200 ${selectedImg === i ? (user ? 'ring-2 ring-yellow-400 scale-105' : 'ring-2 ring-primary-600 scale-105') : 'hover:scale-105'}`}
                 onClick={() => setSelectedImg(i)}
               />
             ))}
@@ -84,100 +86,108 @@ const ProductDetails: React.FC = () => {
 
         {/* Center: Product Info */}
         <div className="md:w-2/5 flex flex-col gap-4">
-          <h1 className="text-3xl font-extrabold mb-1 text-gray-900 leading-tight">{product.name}</h1>
+          <h1 className={`text-3xl font-extrabold mb-1 leading-tight ${user ? 'text-white' : 'text-gray-900'}`}>{product.name}</h1>
           {/* Ratings placeholder */}
           <div className="flex items-center gap-2 mb-2">
             <span className="text-yellow-400 text-lg">★ ★ ★ ★ ☆</span>
-            <span className="text-sm text-gray-500">(123 ratings)</span>
+            <span className={`text-sm ${user ? 'text-gray-400' : 'text-gray-500'}`}>(123 ratings)</span>
           </div>
           <div className="flex items-center gap-4 mb-2">
             {product.salePrice ? (
               <>
-                <span className="text-2xl font-bold text-primary-600">₹{product.salePrice}</span>
-                <span className="text-lg line-through text-gray-500">₹{product.price}</span>
-                <span className="text-green-600 font-semibold">{Math.round(100 - (product.salePrice / product.price) * 100)}% off</span>
+                <span className={`text-2xl font-bold ${user ? 'text-yellow-400' : 'text-primary-600'}`}>₹{product.salePrice}</span>
+                <span className={`text-lg line-through ${user ? 'text-gray-500' : 'text-gray-500'}`}>₹{product.price}</span>
+                <span className={`font-semibold ${user ? 'text-yellow-400' : 'text-green-600'}`}>{Math.round(100 - (product.salePrice / product.price) * 100)}% off</span>
               </>
             ) : (
-              <span className="text-2xl font-bold text-primary-600">₹{product.price}</span>
+              <span className={`text-2xl font-bold ${user ? 'text-yellow-400' : 'text-primary-600'}`}>₹{product.price}</span>
             )}
           </div>
           {/* Offers placeholder */}
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded mb-2 text-sm">
-            <span className="font-semibold text-yellow-700">Prime deal:</span> Free delivery for Prime members
+          <div className={`${user ? 'bg-yellow-400/20 border-l-4 border-yellow-400' : 'bg-yellow-50 border-l-4 border-yellow-400'} p-3 rounded mb-2 text-sm`}>
+            <span className={`font-semibold ${user ? 'text-yellow-400' : 'text-yellow-700'}`}>{user ? 'Exclusive deal:' : 'Prime deal:'}</span> {user ? 'Discreet delivery for elite members' : 'Free delivery for Prime members'}
           </div>
           <div className="mb-2 text-sm">
-            <span className="font-semibold">Stock:</span> {product.stock > 0 ? <span className="text-green-700">{product.stock} available</span> : <span className="text-red-600">Out of stock</span>}
+            <span className={`font-semibold ${user ? 'text-white' : 'text-gray-900'}`}>Stock:</span> {product.stock > 0 ? <span className={`${user ? 'text-yellow-400' : 'text-green-700'}`}>{product.stock} available</span> : <span className="text-red-600">Out of stock</span>}
           </div>
           <div className="mb-2 text-sm">
-            <span className="font-semibold">Category:</span>{' '}
-            <Link to={`/products?category=${product.categoryId.name}`} className="text-primary-600 hover:underline">
+            <span className={`font-semibold ${user ? 'text-white' : 'text-gray-900'}`}>Category:</span>{' '}
+            <Link to={`/products?category=${product.categoryId.name}`} className={`${user ? 'text-yellow-400 hover:text-yellow-300' : 'text-primary-600 hover:underline'}`}>
               {product.categoryId.name}
             </Link>
           </div>
           <div className="mb-2 text-base">
-            <span className="font-semibold">Description:</span>
-            <p className="text-gray-700 mt-1 leading-relaxed">{product.description}</p>
+            <span className={`font-semibold ${user ? 'text-white' : 'text-gray-900'}`}>Description:</span>
+            <p className={`mt-1 leading-relaxed ${user ? 'text-gray-300' : 'text-gray-700'}`}>{product.description}</p>
           </div>
           {/* Features placeholder */}
           <div className="mb-2">
-            <span className="font-semibold">Features:</span>
-            <ul className="list-disc ml-6 text-gray-700 text-sm">
-              <li>High quality</li>
-              <li>Fast delivery</li>
-              <li>Easy returns</li>
+            <span className={`font-semibold ${user ? 'text-white' : 'text-gray-900'}`}>Features:</span>
+            <ul className={`list-disc ml-6 text-sm ${user ? 'text-gray-300' : 'text-gray-700'}`}>
+              <li>Premium quality</li>
+              <li>Discreet delivery</li>
+              <li>Anonymous transactions</li>
             </ul>
           </div>
         </div>
 
         {/* Right: Sticky Purchase Box */}
         <div className="md:w-1/4">
-          <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col gap-4 border sticky top-8 animate-fade-in">
+          <div className={`${user ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} rounded-xl shadow-lg p-6 flex flex-col gap-4 border sticky top-8 animate-fade-in`}>
             <div className="flex items-center gap-2">
               {product.salePrice ? (
                 <>
-                  <span className="text-2xl font-bold text-primary-600">₹{product.salePrice}</span>
-                  <span className="text-lg line-through text-gray-500">₹{product.price}</span>
+                  <span className={`text-2xl font-bold ${user ? 'text-yellow-400' : 'text-primary-600'}`}>₹{product.salePrice}</span>
+                  <span className={`text-lg line-through ${user ? 'text-gray-500' : 'text-gray-500'}`}>₹{product.price}</span>
                 </>
               ) : (
-                <span className="text-2xl font-bold text-primary-600">₹{product.price}</span>
+                <span className={`text-2xl font-bold ${user ? 'text-yellow-400' : 'text-primary-600'}`}>₹{product.price}</span>
               )}
             </div>
-            <div className="text-green-600 font-semibold text-sm">Inclusive of all taxes</div>
+            <div className={`font-semibold text-sm ${user ? 'text-yellow-400' : 'text-green-600'}`}>Inclusive of all taxes</div>
             <div className="mb-2 text-sm">
-              <span className="font-semibold">Delivery:</span> Free delivery in 2-4 days
+              <span className={`font-semibold ${user ? 'text-white' : 'text-gray-900'}`}>Delivery:</span> {user ? 'Discreet delivery in 2-4 days' : 'Free delivery in 2-4 days'}
             </div>
             <div className="mb-2 text-sm">
-              <span className="font-semibold">Quantity:</span>
+              <span className={`font-semibold ${user ? 'text-white' : 'text-gray-900'}`}>Quantity:</span>
               <input
                 type="number"
                 min={1}
                 max={product.stock}
                 value={quantity}
-                onChange={e => setQuantity(Math.max(1, Math.min(product.stock, Number(e.target.value))))}
-                className="w-16 ml-2 border rounded px-2 py-1 focus:ring-2 focus:ring-primary-500"
+                onChange={(e) => setQuantity(Math.max(1, Math.min(product.stock, Number(e.target.value))))}
+                className={`w-16 ml-2 border rounded px-2 py-1 focus:ring-2 ${user ? 'border-gray-600 bg-gray-800 text-white focus:ring-yellow-400' : 'border-gray-300 focus:ring-primary-500'}`}
               />
             </div>
             <button
-              className="btn btn-primary w-full transition-transform duration-150 hover:scale-105 active:scale-95 shadow-md"
+              className={`w-full font-semibold py-2 px-4 rounded-none transition-colors shadow-md transition-transform duration-150 hover:scale-105 active:scale-95 ${user ? 'bg-yellow-400 hover:bg-yellow-300 text-black' : 'bg-primary-600 hover:bg-primary-700 text-white'}`}
               disabled={product.stock === 0}
-              onClick={() => addToCart(product, quantity)}
+              onClick={() => {
+                addToCart(product, quantity);
+              }}
             >
               Add to Cart
             </button>
             <button
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded transition-colors shadow-md transition-transform duration-150 hover:scale-105 active:scale-95"
+              className={`w-full font-semibold py-2 px-4 rounded-none transition-colors shadow-md transition-transform duration-150 hover:scale-105 active:scale-95 ${user ? 'bg-gray-800 hover:bg-gray-700 text-white border border-yellow-400' : 'bg-orange-500 hover:bg-orange-600 text-white'}`}
               disabled={product.stock === 0}
-              onClick={() => addToCart(product, quantity)}
+              onClick={() => {
+                addToCart(product, quantity);
+                window.location.href = '/cart';
+              }}
             >
               Buy Now
             </button>
             <button
-              className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-100 transition-colors"
+              className={`w-full border py-2 px-4 rounded-none transition-colors ${user ? 'border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
               disabled={product.stock === 0}
+              onClick={() => {
+                console.log('Add to wishlist clicked');
+              }}
             >
-              Add to Wishlist
+              {user ? 'Add to Wishlist' : 'Add to Wishlist'}
             </button>
-            <div className="text-xs text-gray-500 mt-2">Only {product.stock} left in stock.</div>
+            <div className={`text-xs mt-2 ${user ? 'text-gray-400' : 'text-gray-500'}`}>Only {product.stock} left in stock.</div>
           </div>
         </div>
       </div>
@@ -185,27 +195,27 @@ const ProductDetails: React.FC = () => {
       {/* Below: Only Product Details and Related Products */}
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
-          <div className="mb-8 border-b pb-6">
-            <h2 className="text-xl font-bold mb-2">Product Details</h2>
-            <p className="text-gray-700">{product.description}</p>
+          <div className={`mb-8 border-b pb-6 ${user ? 'border-gray-700' : 'border-gray-200'}`}>
+            <h2 className={`text-xl font-bold mb-2 ${user ? 'text-white' : 'text-gray-900'}`}>Product Details</h2>
+            <p className={`${user ? 'text-gray-300' : 'text-gray-700'}`}>{product.description}</p>
           </div>
         </div>
         <div>
-          <h2 className="text-xl font-bold mb-4">Related Products</h2>
+          <h2 className={`text-xl font-bold mb-4 ${user ? 'text-white' : 'text-gray-900'}`}>Related Products</h2>
           <div className="grid grid-cols-1 gap-4">
             {related.map((rel) => (
-              <Link key={rel._id} to={`/products/${rel._id}`} className="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <Link key={rel._id} to={`/products/${rel._id}`} className={`block rounded-lg shadow-sm hover:shadow-md transition-shadow ${user ? 'bg-gray-900 border border-gray-700' : 'bg-white'}`}>
                 <img src={rel.images[0]} alt={rel.name} className="w-full h-32 object-cover rounded-t-lg" />
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold mb-2">{rel.name}</h3>
+                  <h3 className={`text-lg font-semibold mb-2 ${user ? 'text-white' : 'text-gray-900'}`}>{rel.name}</h3>
                   <div className="flex items-center gap-2">
                     {rel.salePrice ? (
                       <>
-                        <span className="text-primary-600 font-bold">₹{rel.salePrice}</span>
-                        <span className="line-through text-gray-500">₹{rel.price}</span>
+                        <span className={`font-bold ${user ? 'text-yellow-400' : 'text-primary-600'}`}>₹{rel.salePrice}</span>
+                        <span className={`line-through ${user ? 'text-gray-500' : 'text-gray-500'}`}>₹{rel.price}</span>
                       </>
                     ) : (
-                      <span className="text-primary-600 font-bold">₹{rel.price}</span>
+                      <span className={`font-bold ${user ? 'text-yellow-400' : 'text-primary-600'}`}>₹{rel.price}</span>
                     )}
                   </div>
                 </div>

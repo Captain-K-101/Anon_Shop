@@ -15,6 +15,7 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import ProductModal from '../components/ProductModal';
+import api from '../lib/axios';
 
 interface Category {
   _id: string;
@@ -65,18 +66,8 @@ const AdminProducts: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/products?limit=100', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch products');
-      }
-
-      const data = await response.json();
-      setProducts(data.products);
+      const response = await api.get('/api/products?limit=100');
+      setProducts(response.data.products);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -86,11 +77,8 @@ const AdminProducts: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/categories');
-      if (response.ok) {
-        const data = await response.json();
-        setCategories(data.categories);
-      }
+      const response = await api.get('/api/categories');
+      setCategories(response.data.categories);
     } catch (err) {
       console.error('Error fetching categories:', err);
     }
@@ -103,17 +91,7 @@ const AdminProducts: React.FC = () => {
 
     setDeletingProduct(productId);
     try {
-      const response = await fetch(`/api/products/${productId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete product');
-      }
-
+      await api.delete(`/api/products/${productId}`);
       setProducts(products.filter(product => product._id !== productId));
     } catch (err) {
       console.error('Error deleting product:', err);
@@ -125,19 +103,7 @@ const AdminProducts: React.FC = () => {
 
   const toggleProductStatus = async (productId: string, isActive: boolean) => {
     try {
-      const response = await fetch(`/api/products/${productId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ isActive })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update product status');
-      }
-
+      await api.put(`/api/products/${productId}`, { isActive });
       setProducts(products.map(product => 
         product._id === productId ? { ...product, isActive } : product
       ));
@@ -149,19 +115,7 @@ const AdminProducts: React.FC = () => {
 
   const toggleFeatured = async (productId: string, isFeatured: boolean) => {
     try {
-      const response = await fetch(`/api/products/${productId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ isFeatured })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update product featured status');
-      }
-
+      await api.put(`/api/products/${productId}`, { isFeatured });
       setProducts(products.map(product => 
         product._id === productId ? { ...product, isFeatured } : product
       ));
@@ -180,23 +134,14 @@ const AdminProducts: React.FC = () => {
   const handleSaveProduct = async (productData: any) => {
     setIsSaving(true);
     try {
-      const url = isCreating ? '/api/products' : `/api/products/${selectedProduct?._id}`;
-      const method = isCreating ? 'POST' : 'PUT';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(productData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save product');
+      let response;
+      if (isCreating) {
+        response = await api.post('/api/products', productData);
+      } else {
+        response = await api.put(`/api/products/${selectedProduct?._id}`, productData);
       }
 
-      const data = await response.json();
+      const data = response.data;
       
       if (isCreating) {
         setProducts([data.product, ...products]);

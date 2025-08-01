@@ -18,6 +18,7 @@ import {
   X
 } from 'lucide-react';
 import UserModal, { ResetPasswordModal } from '../components/UserModal';
+import api from '../lib/axios';
 
 interface User {
   _id: string;
@@ -58,16 +59,8 @@ const AdminUsers: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/admin/users', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.users);
-      }
+      const response = await api.get('/api/admin/users');
+      setUsers(response.data.users);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -81,16 +74,8 @@ const AdminUsers: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (response.ok) {
-        setUsers(users.filter(user => user._id !== userId));
-      }
+      await api.delete(`/api/admin/users/${userId}`);
+      setUsers(users.filter(user => user._id !== userId));
     } catch (error) {
       console.error('Error deleting user:', error);
     }
@@ -98,21 +83,12 @@ const AdminUsers: React.FC = () => {
 
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}/toggle-status`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ isActive: !currentStatus })
-      });
-
-      if (response.ok) {
-        setUsers(users.map(user => 
-          user._id === userId 
-            ? { ...user, isActive: !currentStatus }
-            : user
-        ));
-      }
+      await api.put(`/api/admin/users/${userId}/toggle-status`, { isActive: !currentStatus });
+      setUsers(users.map(user => 
+        user._id === userId 
+          ? { ...user, isActive: !currentStatus }
+          : user
+      ));
     } catch (error) {
       console.error('Error toggling user status:', error);
     }
@@ -120,21 +96,12 @@ const AdminUsers: React.FC = () => {
 
   const handleToggleFlag = async (userId: string, currentFlagged: boolean) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}/flag`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ flagged: !currentFlagged })
-      });
-      if (response.ok) {
-        setUsers(users.map(user =>
-          user._id === userId
-            ? { ...user, flagged: !currentFlagged }
-            : user
-        ));
-      }
+      await api.post(`/api/admin/users/${userId}/flag`, { flagged: !currentFlagged });
+      setUsers(users.map(user =>
+        user._id === userId
+          ? { ...user, flagged: !currentFlagged }
+          : user
+      ));
     } catch (error) {
       console.error('Error flagging user:', error);
     }

@@ -9,7 +9,7 @@ export interface IOrderItem {
 export interface IOrder extends Document {
   userId: mongoose.Types.ObjectId;
   orderNumber: string;
-  status: 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED';
+  status: 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED';
   paymentMethod: 'UPI' | 'COD';
   paymentStatus: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
   subtotal: number;
@@ -61,7 +61,7 @@ const orderSchema = new Schema<IOrder>({
   },
   status: {
     type: String,
-    enum: ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'],
+    enum: ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED', 'REFUNDED'],
     default: 'PENDING'
   },
   paymentMethod: {

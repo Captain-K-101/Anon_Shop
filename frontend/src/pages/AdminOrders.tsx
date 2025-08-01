@@ -15,6 +15,7 @@ import {
   CreditCard,
   DollarSign
 } from 'lucide-react';
+import api from '../lib/axios';
 
 interface OrderItem {
   productId: {
@@ -77,18 +78,8 @@ const AdminOrders: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/orders/admin/all', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch orders');
-      }
-
-      const data = await response.json();
-      setOrders(data.orders);
+      const response = await api.get('/api/orders/admin/all');
+      setOrders(response.data.orders);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -98,18 +89,8 @@ const AdminOrders: React.FC = () => {
 
   const fetchDeliveryPersonnel = async () => {
     try {
-      const response = await fetch('/api/admin/users/delivery-personnel', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch delivery personnel');
-      }
-
-      const data = await response.json();
-      setDeliveryPersonnel(data.users);
+      const response = await api.get('/api/admin/users/delivery-personnel');
+      setDeliveryPersonnel(response.data.users);
     } catch (err) {
       console.error('Error fetching delivery personnel:', err);
     }
@@ -123,18 +104,7 @@ const AdminOrders: React.FC = () => {
         updateData.paymentStatus = paymentStatus;
       }
 
-      const response = await fetch(`/api/orders/${orderId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(updateData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update order status');
-      }
+      await api.put(`/api/orders/${orderId}/status`, updateData);
 
       // Update local state
       setOrders(orders.map(order => 
@@ -162,18 +132,7 @@ const AdminOrders: React.FC = () => {
   const assignDeliveryPersonnel = async (orderId: string, deliveryPersonId: string | null) => {
     setAssigningDelivery(orderId);
     try {
-      const response = await fetch(`/api/admin/orders/${orderId}/assign-delivery`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ deliveryPersonId })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to assign delivery personnel');
-      }
+      await api.put(`/api/admin/orders/${orderId}/assign-delivery`, { deliveryPersonId });
 
       // Update local state
       setOrders(orders.map(order => {
@@ -241,6 +200,7 @@ const AdminOrders: React.FC = () => {
       case 'CONFIRMED': return 'bg-blue-100 text-blue-800';
       case 'PROCESSING': return 'bg-purple-100 text-purple-800';
       case 'SHIPPED': return 'bg-indigo-100 text-indigo-800';
+      case 'OUT_FOR_DELIVERY': return 'bg-orange-100 text-orange-800';
       case 'DELIVERED': return 'bg-green-100 text-green-800';
       case 'CANCELLED': return 'bg-red-100 text-red-800';
       case 'REFUNDED': return 'bg-gray-100 text-gray-800';
@@ -264,6 +224,7 @@ const AdminOrders: React.FC = () => {
       case 'CONFIRMED': return <CheckCircle className="h-4 w-4" />;
       case 'PROCESSING': return <Package className="h-4 w-4" />;
       case 'SHIPPED': return <Truck className="h-4 w-4" />;
+      case 'OUT_FOR_DELIVERY': return <Truck className="h-4 w-4" />;
       case 'DELIVERED': return <CheckCircle className="h-4 w-4" />;
       case 'CANCELLED': return <XCircle className="h-4 w-4" />;
       default: return <Package className="h-4 w-4" />;
@@ -290,7 +251,7 @@ const AdminOrders: React.FC = () => {
   );
   const pendingOrders = orders.filter(order => order.status === 'PENDING').length;
   const processingOrders = orders.filter(order => 
-    ['CONFIRMED', 'PROCESSING', 'SHIPPED'].includes(order.status)
+    ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'OUT_FOR_DELIVERY'].includes(order.status)
   ).length;
 
   if (loading) {
@@ -403,6 +364,7 @@ const AdminOrders: React.FC = () => {
               <option value="CONFIRMED">Confirmed</option>
               <option value="PROCESSING">Processing</option>
               <option value="SHIPPED">Shipped</option>
+              <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
               <option value="DELIVERED">Delivered</option>
               <option value="CANCELLED">Cancelled</option>
               <option value="REFUNDED">Refunded</option>
