@@ -24,14 +24,14 @@ dotenv.config();
 connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5002;
 
 // Middleware
 app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://yourdomain.com'] 
-    : ['http://localhost:3000'],
+    : ['http://0.0.0.0:3002', 'http://localhost:3002'],
   credentials: true
 }));
 app.use(morgan('combined'));
